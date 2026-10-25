@@ -435,5 +435,7 @@ def main():
     print(f"New playlists: {len(new_playlist_keys)}")
     print("Monitor finished successfully.")
 
+discord_embed("🧪 Test Alert", "Your YouTube monitor can send Discord messages.", color=3066993)
+
 if __name__ == "__main__":
     main()
