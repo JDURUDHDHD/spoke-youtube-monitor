@@ -27,18 +27,25 @@ except urllib.error.HTTPError as e:
     print(f"Discord response: {details[:500]}")
 
 
+
 def discord(message):
-    data = json.dumps({
-        "content": message[:1900],
-        "allowed_mentions": {"parse": []}
-    }).encode()
+    url = os.environ["DISCORD_WEBHOOK_URL"]
+    payload = json.dumps({"content": message}).encode("utf-8")
     request = urllib.request.Request(
-        WEBHOOK, data=data,
+        url,
+        data=payload,
         headers={"Content-Type": "application/json"},
-        method="POST"
+        method="POST",
     )
-    with urllib.request.urlopen(request, timeout=30):
-        pass
+    try:
+        with urllib.request.urlopen(request, timeout=30):
+            pass
+    except urllib.error.HTTPError as e:
+        details = e.read().decode("utf-8", errors="replace")
+        print(f"Discord HTTP error: {e.code}")
+        print(f"Discord response: {details[:500]}")
+        raise
+
 
 
 def pages(endpoint, params):
