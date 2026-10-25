@@ -811,11 +811,6 @@ def main():
 
         add_playlist_entry_alert(state, entry)
 
-    for key in sorted(new_playlist_keys):
-        playlist = current_playlists[key]
-        if not playlist["is_uploads"]:
-            add_new_playlist_alert(state, playlist)
-
     unlisted_ids = {
         entry["video_id"]
         for entry in current_entries.values()
