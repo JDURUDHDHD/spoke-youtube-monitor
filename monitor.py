@@ -1,4 +1,3 @@
-
 import json
 import os
 import urllib.parse
@@ -15,8 +14,17 @@ API = "https://www.googleapis.com/youtube/v3/"
 def api_get(endpoint, params):
     params["key"] = API_KEY
     url = API + endpoint + "?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url, timeout=30) as response:
-        return json.loads(response.read().decode())
+    with urllib.request.urlopen(request, timeout=30):
+
+        pass
+
+except urllib.error.HTTPError as e:
+
+    details = e.read().decode("utf-8", errors="replace")
+
+    print(f"Discord HTTP error: {e.code}")
+
+    print(f"Discord response: {details[:500]}")
 
 
 def discord(message):
