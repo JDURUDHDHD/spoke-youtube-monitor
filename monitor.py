@@ -801,15 +801,6 @@ def main():
         else:
             state["unlisted_alerted"][video_id] = True
 
-    for key in sorted(new_entry_keys):
-        entry = current_entries[key]
-
-        if entry["is_uploads"]:
-            continue
-        if entry["video_id"] in new_upload_ids:
-            continue
-
-        add_playlist_entry_alert(state, entry)
 
     unlisted_ids = {
         entry["video_id"]
