@@ -232,7 +232,42 @@ def dispatch_pending(state):
         if not item:
             continue
 
-        send_discord(item["payload"])
+        sent = False
+
+        for attempt in range(5):
+            try:
+                send_discord(item["payload"])
+                sent = True
+                break
+
+            except urllib.error.HTTPError as error:
+                if error.code != 429:
+                    print(
+                        f"Discord HTTP {error.code} for {event_id}; "
+                        "leaving notification queued."
+                    )
+                    break
+
+                retry_after = 1.0
+                try:
+                    details = json.loads(
+                        error.read().decode("utf-8", errors="replace")
+                    )
+                    retry_after = float(details.get("retry_after", 1.0))
+                except (ValueError, TypeError, json.JSONDecodeError):
+                    pass
+
+                wait_seconds = min(max(retry_after, 1.0), 60.0)
+                print(f"Discord rate limit: waiting {wait_seconds}s.")
+                time.sleep(wait_seconds)
+
+            except (urllib.error.URLError, TimeoutError) as error:
+                print(f"Network error for {event_id}: {error}")
+                break
+
+        if not sent:
+            save_state(state)
+            break
 
         state["pending_notifications"].pop(event_id, None)
         state["sent_notifications"].append(event_id)
@@ -240,7 +275,7 @@ def dispatch_pending(state):
             -MAX_SENT_HISTORY:
         ]
 
-        if item["type"] == "digest":
+        if item.get("type") == "digest":
             state["last_digest_date"] = item["digest_date"]
             state["digest_cursor"] = item["digest_cursor_after"]
 
