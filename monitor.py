@@ -1,5 +1,7 @@
+
 import json
 import os
+import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -12,27 +14,18 @@ API = "https://www.googleapis.com/youtube/v3/"
 
 
 def api_get(endpoint, params):
-    params["key"] = API_KEY
-    url = API + endpoint + "?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(request, timeout=30):
-
-        pass
-
-except urllib.error.HTTPError as e:
-
-    details = e.read().decode("utf-8", errors="replace")
-
-    print(f"Discord HTTP error: {e.code}")
-
-    print(f"Discord response: {details[:500]}")
-
+    query = dict(params)
+    query["key"] = API_KEY
+    url = API + endpoint + "?" + urllib.parse.urlencode(query)
+    request = urllib.request.Request(url)
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8"))
 
 
 def discord(message):
-    url = os.environ["DISCORD_WEBHOOK_URL"]
     payload = json.dumps({"content": message}).encode("utf-8")
     request = urllib.request.Request(
-        url,
+        WEBHOOK,
         data=payload,
         headers={"Content-Type": "application/json"},
         method="POST",
@@ -45,7 +38,6 @@ def discord(message):
         print(f"Discord HTTP error: {e.code}")
         print(f"Discord response: {details[:500]}")
         raise
-
 
 
 def pages(endpoint, params):
@@ -64,7 +56,7 @@ def pages(endpoint, params):
 def get_channel():
     result = api_get("channels", {
         "part": "contentDetails",
-        "id": CHANNEL_ID
+        "id": CHANNEL_ID,
     })
     items = result.get("items", [])
     if not items:
@@ -79,7 +71,7 @@ def collect():
 
     for item in pages("playlists", {
         "part": "snippet",
-        "channelId": CHANNEL_ID
+        "channelId": CHANNEL_ID,
     }):
         pid = item["id"]
         playlists[pid] = item["snippet"].get("title", "Untitled playlist")
@@ -88,7 +80,7 @@ def collect():
 
     for item in pages("playlistItems", {
         "part": "snippet,contentDetails",
-        "playlistId": uploads_playlist
+        "playlistId": uploads_playlist,
     }):
         video_id = item.get("contentDetails", {}).get("videoId")
         if video_id:
@@ -97,7 +89,7 @@ def collect():
     for pid, playlist_title in playlists.items():
         for item in pages("playlistItems", {
             "part": "snippet,contentDetails",
-            "playlistId": pid
+            "playlistId": pid,
         }):
             snippet = item.get("snippet", {})
             content = item.get("contentDetails", {})
@@ -118,13 +110,13 @@ def collect():
                 unavailable[key] = {
                     "playlist": playlist_title,
                     "title": title,
-                    "video_id": video_id
+                    "video_id": video_id,
                 }
 
     return {
         "playlists": playlists,
         "uploads": sorted(set(uploads)),
-        "unavailable": unavailable
+        "unavailable": unavailable,
     }
 
 
@@ -136,11 +128,12 @@ def main():
         previous = json.loads(STATE_FILE.read_text())
 
     if previous is None:
-        STATE_FILE.write_text(json.dumps(current, indent=2))
         discord(
             "✅ Spoke monitor started. Baseline saved for public playlists "
             "and uploads. I'll alert on newly detected changes."
         )
+        STATE_FILE.write_text(json.dumps(current, indent=2))
+        print("Baseline saved successfully.")
         return
 
     alerts = []
@@ -169,7 +162,6 @@ def main():
                 f"Entry: {item['title']}"
             )
 
-    # Save only after the API checks and notifications succeed.
     for start in range(0, len(alerts), 5):
         discord("\n\n".join(alerts[start:start + 5]))
 
