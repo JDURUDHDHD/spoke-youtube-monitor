@@ -19,9 +19,10 @@ CHANNEL_HANDLES = [
     "@Parrotx2",
 ]
 
-HEADERS = {"User-Agent": "YouTubeMonitor/5.0"}
+HEADERS = {"User-Agent": "YouTubeMonitor/5.1"}
 MAX_SENT_HISTORY = 2000
 MAX_DIGEST_EVENTS = 5000
+RECENT_HOURS = 24
 
 
 def now_utc():
@@ -30,6 +31,22 @@ def now_utc():
 
 def today_utc():
     return now_utc().date().isoformat()
+
+
+def published_recently(detail):
+    """True only when YouTube provides a recent publication date."""
+    published_at = detail.get("snippet", {}).get("publishedAt")
+    if not published_at:
+        return False
+
+    try:
+        published = datetime.fromisoformat(
+            published_at.replace("Z", "+00:00")
+        )
+        age = (now_utc() - published).total_seconds()
+        return 0 <= age <= RECENT_HOURS * 60 * 60
+    except (ValueError, TypeError):
+        return False
 
 
 def api_get(endpoint, params):
@@ -47,7 +64,9 @@ def api_get(endpoint, params):
             f"YouTube API error {error.code}: {details[:400]}"
         ) from error
     except (urllib.error.URLError, TimeoutError) as error:
-        raise RuntimeError(f"YouTube API connection failed: {error}") from error
+        raise RuntimeError(
+            f"YouTube API connection failed: {error}"
+        ) from error
 
 
 def save_state(state):
@@ -79,7 +98,9 @@ def load_state():
         return new_state(), True
 
     try:
-        state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+        state = json.loads(
+            STATE_FILE.read_text(encoding="utf-8")
+        )
     except (OSError, json.JSONDecodeError) as error:
         raise RuntimeError(
             "state.json could not be read. Stopping to protect "
@@ -88,7 +109,19 @@ def load_state():
 
     version = state.get("schema_version")
 
-    if version in (4, 5):
+    if version == 5:
+        state.setdefault("entries", {})
+        state.setdefault("playlists", {})
+        state.setdefault("pending_notifications", {})
+        state.setdefault("sent_notifications", [])
+        state.setdefault("digest_events", [])
+        state.setdefault("digest_cursor", 0)
+        state.setdefault("last_digest_date", today_utc())
+        state.setdefault("unlisted_alerted", {})
+        state.setdefault("last_scan_report", {})
+        return state, False
+
+    if version == 4:
         state["schema_version"] = 5
         state.setdefault("entries", {})
         state.setdefault("playlists", {})
@@ -99,6 +132,7 @@ def load_state():
         state.setdefault("last_digest_date", today_utc())
         state.setdefault("unlisted_alerted", {})
         state.setdefault("last_scan_report", {})
+        print("Upgraded state from version 4 to version 5.")
         return state, False
 
     if version == 3:
@@ -186,7 +220,6 @@ def record_digest_event(state, event_id, title, description, url):
         "description": description,
         "url": url,
     })
-
     state["digest_events"] = state["digest_events"][-MAX_DIGEST_EVENTS:]
 
 
@@ -269,7 +302,7 @@ def collect_playlist(channel, playlist_id, playlist_info):
     entries = {}
     page_token = None
 
-    # Read every page returned by the API, not just the first 50 items.
+    # Scan all pages of each accessible playlist.
     while True:
         params = {
             "part": "snippet,contentDetails,status",
@@ -357,14 +390,12 @@ def add_video_alert(state, entry, detail):
     elif privacy == "unlisted":
         label = "🔎 UNLISTED VIDEO DETECTED"
         color = 9807270
-        state["unlisted_alerted"][video_id] = True
     else:
         label = "🆕 NEW VIDEO"
         color = 3066993
 
-    thumbnails = snippet.get("thumbnails", {})
     thumbnail = (
-        thumbnails.get("high", {}).get("url")
+        snippet.get("thumbnails", {}).get("high", {}).get("url")
         or entry.get("thumbnail")
     )
 
@@ -384,52 +415,58 @@ def add_video_alert(state, entry, detail):
         })
 
     description = (
-        f"**{entry['title']}**\n"
+        f"**{snippet.get('title') or entry['title']}**\n"
         f"[Watch on YouTube]({video_url})\n"
         f"[Visit channel]({entry['channel_url']})"
     )
 
     event_id = f"video:{video_id}"
-    payload = make_embed(
-        label, description, url=video_url, image=thumbnail,
-        color=color, fields=fields,
+    queue_notification(
+        state,
+        event_id,
+        make_embed(
+            label, description, url=video_url, image=thumbnail,
+            color=color, fields=fields,
+        ),
     )
-    queue_notification(state, event_id, payload)
-    record_digest_event(state, event_id, label, entry["title"], video_url)
+    record_digest_event(
+        state, event_id, label, entry["title"], video_url
+    )
 
 
 def add_unlisted_alert(state, entry, detail):
     video_id = entry["video_id"]
     video_url = f"https://www.youtube.com/watch?v={video_id}"
-
     title = detail.get("snippet", {}).get("title") or entry["title"]
-    channel = entry["channel"]
 
-    payload = make_embed(
-        "🔎 UNLISTED VIDEO DETECTED",
-        f"**{title}**\n"
-        f"Creator: **{channel}**\n"
-        f"Found through: **{entry['playlist']}**\n"
-        f"[Open video]({video_url})",
-        url=video_url,
-        image=entry.get("thumbnail"),
-        color=9807270,
-        fields=[
-            {"name": "Visibility", "value": "unlisted", "inline": True},
-            {
-                "name": "Detection scope",
-                "value": "Video ID found in an accessible playlist",
-                "inline": False,
-            },
-        ],
+    queue_notification(
+        state,
+        f"unlisted:{video_id}",
+        make_embed(
+            "🔎 UNLISTED VIDEO DETECTED",
+            f"**{title}**\n"
+            f"Creator: **{entry['channel']}**\n"
+            f"Found through: **{entry['playlist']}**\n"
+            f"[Open video]({video_url})",
+            url=video_url,
+            image=entry.get("thumbnail"),
+            color=9807270,
+            fields=[
+                {"name": "Visibility", "value": "unlisted", "inline": True},
+                {
+                    "name": "Detection scope",
+                    "value": "Found through an accessible playlist",
+                    "inline": False,
+                },
+            ],
+        ),
     )
 
-    queue_notification(state, f"unlisted:{video_id}", payload)
     record_digest_event(
         state,
         f"unlisted:{video_id}",
         "Unlisted video detected",
-        f"{channel}: {title}",
+        f"{entry['channel']}: {title}",
         video_url,
     )
     state["unlisted_alerted"][video_id] = True
@@ -439,12 +476,12 @@ def add_playlist_entry_alert(state, entry):
     video_url = f"https://www.youtube.com/watch?v={entry['video_id']}"
     privacy = entry["privacy"]
 
-    if privacy == "unlisted":
-        label = "🔎 Unlisted Video Found in Playlist"
-        color = 9807270
-    else:
-        label = "➕ New Playlist Entry"
-        color = 3447003
+    label = (
+        "🔎 Unlisted Video Found in Playlist"
+        if privacy == "unlisted"
+        else "➕ New Playlist Entry"
+    )
+    color = 9807270 if privacy == "unlisted" else 3447003
 
     description = (
         f"**{entry['title']}**\n"
@@ -458,12 +495,17 @@ def add_playlist_entry_alert(state, entry):
         f"entry:{entry['channel_id']}|"
         f"{entry['playlist_id']}|{entry['video_id']}"
     )
-    payload = make_embed(
-        label, description, url=video_url,
-        image=entry.get("thumbnail"), color=color,
+    queue_notification(
+        state,
+        event_id,
+        make_embed(
+            label, description, url=video_url,
+            image=entry.get("thumbnail"), color=color,
+        ),
     )
-    queue_notification(state, event_id, payload)
-    record_digest_event(state, event_id, label, entry["title"], video_url)
+    record_digest_event(
+        state, event_id, label, entry["title"], video_url
+    )
 
     if privacy == "unlisted":
         state["unlisted_alerted"][entry["video_id"]] = True
@@ -484,10 +526,13 @@ def add_new_playlist_alert(state, playlist):
     )
 
     event_id = f"playlist:{playlist['channel_id']}|{playlist['playlist_id']}"
-    payload = make_embed(
-        label, description, url=playlist_url, color=10181046,
+    queue_notification(
+        state,
+        event_id,
+        make_embed(
+            label, description, url=playlist_url, color=10181046
+        ),
     )
-    queue_notification(state, event_id, payload)
     record_digest_event(
         state, event_id, label, playlist["title"], playlist_url
     )
@@ -496,17 +541,18 @@ def add_new_playlist_alert(state, playlist):
 def queue_scan_error(state, error_text):
     event_id = f"scan-error:{today_utc()}"
 
-    payload = make_embed(
-        "⚠️ YouTube Monitor Scan Failed",
-        "The scan did not complete successfully. Existing video and "
-        "playlist history was preserved, and new discoveries were not "
-        "committed as a completed scan.\n\n"
-        f"**Error:** {error_text[:2500]}\n\n"
-        "The next scheduled run will try again.",
-        color=15158332,
+    queue_notification(
+        state,
+        event_id,
+        make_embed(
+            "⚠️ YouTube Monitor Scan Failed",
+            "The scan did not complete. The previous video and playlist "
+            "baseline was preserved.\n\n"
+            f"**Error:** {error_text[:2500]}\n\n"
+            "The next scheduled run will try again.",
+            color=15158332,
+        ),
     )
-
-    queue_notification(state, event_id, payload)
 
 
 def schedule_daily_digest(state):
@@ -545,27 +591,23 @@ def schedule_daily_digest(state):
 
     report = state.get("last_scan_report", {})
     report_text = (
-        f"**Last successful scan report**\n"
+        "**Last successful scan report**\n"
         f"Channels checked: {report.get('channels', 0)}\n"
-        f"Accessible playlist entries checked: {report.get('entries', 0)}\n"
-        f"Unique video IDs checked for privacy: {report.get('videos_checked', 0)}\n"
+        f"Accessible playlist entries: {report.get('entries', 0)}\n"
+        f"Video details returned: {report.get('videos_checked', 0)}\n"
         f"Unlisted videos identified: {report.get('unlisted_found', 0)}\n"
-        f"Scan result: {report.get('status', 'No successful scan recorded')}"
-    )
-
-    payload = make_embed(
-        "📊 Daily YouTube Creator Digest",
-        f"Activity summary for the four monitored channels.\n\n"
-        f"{report_text}\n\n"
-        f"{description}\n\n"
-        f"*Digest date: {today} (UTC)*",
-        color=5793266,
+        f"Result: {report.get('status', 'No successful scan recorded')}"
     )
 
     queue_notification(
         state,
         f"digest:{today}",
-        payload,
+        make_embed(
+            "📊 Daily YouTube Creator Digest",
+            f"{report_text}\n\n{description}\n\n"
+            f"*Digest date: {today} (UTC)*",
+            color=5793266,
+        ),
         event_type="digest",
         digest_cursor_after=len(state["digest_events"]),
         digest_date=today,
@@ -581,8 +623,6 @@ def main():
     current_playlists = {}
     channels_checked = 0
 
-    # If any required scan fails, keep the old baseline intact.
-    # This avoids treating a partial scan as a successful full scan.
     try:
         for handle in CHANNEL_HANDLES:
             print(f"Checking {handle}...")
@@ -607,32 +647,24 @@ def main():
                     collect_playlist(channel, playlist_id, info)
                 )
 
-            print(
-                f"{channel['name']}: found {len(playlists)} "
-                "public playlists including uploads"
-            )
-
-        # Refresh status for every video ID currently found through
-        # accessible playlists, not only newly discovered uploads.
-        unique_video_ids = list(dict.fromkeys(
+        unique_ids = list(dict.fromkeys(
             entry["video_id"] for entry in current_entries.values()
         ))
-        details = get_video_details(unique_video_ids)
+        details = get_video_details(unique_ids)
 
     except Exception as error:
-        message = str(error)
-        print(f"SCAN FAILED: {message}")
-        queue_scan_error(state, message)
+        print(f"SCAN FAILED: {error}")
+        queue_scan_error(state, str(error))
         save_state(state)
         dispatch_pending(state)
         raise
 
-    # Prefer the video's current status when available.
+    # Refresh the privacy information using video details when available.
     for entry in current_entries.values():
         detail = details.get(entry["video_id"], {})
-        privacy = detail.get("status", {}).get("privacyStatus")
-        if privacy:
-            entry["privacy"] = privacy
+        status = detail.get("status", {})
+        if status.get("privacyStatus"):
+            entry["privacy"] = status["privacyStatus"]
 
     if first_run:
         state["entries"] = current_entries
@@ -643,6 +675,8 @@ def main():
             for entry in current_entries.values()
             if entry["privacy"] == "unlisted"
         }
+        for video_id in unlisted_ids:
+            state["unlisted_alerted"][video_id] = True
 
         state["last_scan_report"] = {
             "status": "SUCCESS — initial baseline created",
@@ -653,11 +687,6 @@ def main():
             "checked_at": now_utc().isoformat(),
         }
 
-        # Record unlisted videos in the baseline without generating a
-        # huge burst of alerts for old content on first startup.
-        for video_id in unlisted_ids:
-            state["unlisted_alerted"][video_id] = True
-
         queue_notification(
             state,
             "startup:v5",
@@ -666,11 +695,10 @@ def main():
                 "Monitoring all four configured channels. "
                 "Existing accessible videos and playlists were saved "
                 "as the initial baseline.\n\n"
-                f"Accessible playlist entries: {len(current_entries)}\n"
-                f"Video IDs with details returned: {len(details)}\n"
-                f"Unlisted videos identified: {len(unlisted_ids)}\n\n"
-                "Unlisted detection only covers video IDs discoverable "
-                "through accessible playlists.",
+                f"Accessible entries: {len(current_entries)}\n"
+                f"Video details returned: {len(details)}\n"
+                f"Unlisted videos identified: {len(unlisted_ids)}\n"
+                "Unlisted detection is limited to discoverable video IDs.",
                 color=3066993,
             ),
         )
@@ -682,7 +710,18 @@ def main():
     if old_playlists is None:
         old_playlists = current_playlists.copy()
 
-    new_entry_keys = current_entries.keys() - old_entries.keys()
+    # Find entries not in the saved baseline.
+    discovered_keys = current_entries.keys() - old_entries.keys()
+
+    # Only announce newly discovered videos whose actual publication date
+    # is within the last 24 hours. Save older entries silently below.
+    new_entry_keys = {
+        key for key in discovered_keys
+        if published_recently(
+            details.get(current_entries[key]["video_id"], {})
+        )
+    }
+
     new_playlist_keys = current_playlists.keys() - old_playlists.keys()
 
     new_upload_ids = {
@@ -691,7 +730,6 @@ def main():
         if current_entries[key]["is_uploads"]
     }
 
-    # Send normal upload/Premiere alerts for newly discovered uploads.
     for video_id in sorted(new_upload_ids):
         entry = next(
             item for item in current_entries.values()
@@ -699,8 +737,8 @@ def main():
         )
         add_video_alert(state, entry, details.get(video_id, {}))
 
-    # Notify about newly identified unlisted videos, including videos
-    # that were already in the baseline but are now reported unlisted.
+    # Alert only once when a recently published, discovered video is
+    # reported as unlisted. Older discoveries are marked as handled.
     for entry in current_entries.values():
         video_id = entry["video_id"]
         detail = details.get(video_id, {})
@@ -708,11 +746,15 @@ def main():
             "privacyStatus", entry["privacy"]
         )
 
-        if (
-            privacy == "unlisted"
-            and not state["unlisted_alerted"].get(video_id)
-        ):
+        if privacy != "unlisted":
+            continue
+        if state["unlisted_alerted"].get(video_id):
+            continue
+
+        if published_recently(detail):
             add_unlisted_alert(state, entry, detail)
+        else:
+            state["unlisted_alerted"][video_id] = True
 
     for key in sorted(new_entry_keys):
         entry = current_entries[key]
@@ -744,21 +786,22 @@ def main():
         "checked_at": now_utc().isoformat(),
     }
 
+    # Save every discovered entry, including old ones intentionally
+    # suppressed above, so they won't trigger alerts on future scans.
     state["entries"] = current_entries
     state["playlists"] = current_playlists
 
     schedule_daily_digest(state)
-
     save_state(state)
     dispatch_pending(state)
 
     print(f"Channels checked: {channels_checked}")
-    print(f"Accessible playlist entries checked: {len(current_entries)}")
-    print(f"Video IDs with details returned: {len(details)}")
+    print(f"Accessible entries: {len(current_entries)}")
+    print(f"Video details returned: {len(details)}")
     print(f"Unlisted videos identified: {len(unlisted_ids)}")
-    print(f"New playlist entries: {len(new_entry_keys)}")
+    print(f"Newly discovered recent entries: {len(new_entry_keys)}")
     print(f"New playlists: {len(new_playlist_keys)}")
-    print(f"Notifications still pending: {len(state['pending_notifications'])}")
+    print(f"Notifications pending: {len(state['pending_notifications'])}")
     print("Monitor finished successfully.")
 
 
