@@ -1,15 +1,14 @@
 
 import json
 import os
-import urllib.error
 import urllib.parse
 import urllib.request
+import urllib.error
 from pathlib import Path
 from datetime import datetime, timezone
 
 API_KEY = os.environ["YOUTUBE_API_KEY"]
 DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
-
 API = "https://www.googleapis.com/youtube/v3"
 STATE_FILE = Path("state.json")
 
@@ -20,14 +19,22 @@ CHANNEL_HANDLES = [
     "@Parrotx2",
 ]
 
-HEADERS = {
-    "User-Agent": "YouTubeMonitor/3.0",
-}
+HEADERS = {"User-Agent": "YouTubeMonitor/4.0"}
+MAX_SENT_HISTORY = 2000
+
+
+def now_utc():
+    return datetime.now(timezone.utc)
+
+
+def today_utc():
+    return now_utc().date().isoformat()
+
 
 def api_get(endpoint, params):
-    query = dict(params)
-    query["key"] = API_KEY
-    url = API + endpoint + "?" + urllib.parse.urlencode(query)
+    params = dict(params)
+    params["key"] = API_KEY
+    url = API + endpoint + "?" + urllib.parse.urlencode(params)
     request = urllib.request.Request(url, headers=HEADERS)
 
     try:
@@ -39,30 +46,82 @@ def api_get(endpoint, params):
             f"YouTube API error {error.code}: {details[:500]}"
         ) from error
 
-def discord_embed(title, description, url=None, image=None,
-                  color=3447003, fields=None):
-    embed = {
-        "title": title[:256],
-        "description": description[:4000],
-        "color": color,
-        "timestamp": datetime.now(timezone.utc).isoformat(),
+
+def save_state(state):
+    temp_file = STATE_FILE.with_suffix(".tmp")
+    temp_file.write_text(
+        json.dumps(state, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    temp_file.replace(STATE_FILE)
+
+
+def new_state(entries=None, playlists=None):
+    return {
+        "schema_version": 4,
+        "entries": entries or {},
+        "playlists": playlists or {},
+        "pending_notifications": {},
+        "sent_notifications": [],
+        "digest_events": [],
+        "digest_cursor": 0,
+        "last_digest_date": today_utc(),
     }
 
-    if url:
-        embed["url"] = url
-    if image:
-        embed["thumbnail"] = {"url": image}
-    if fields:
-        embed["fields"] = fields[:25]
 
-    payload = {
-        "embeds": [embed],
-        "allowed_mentions": {"parse": []},
-    }
+def load_state():
+    if not STATE_FILE.exists():
+        return new_state(), True
 
+    try:
+        state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise RuntimeError(
+            "state.json could not be read. Stopping to protect "
+            "the existing notification history."
+        ) from error
+
+    version = state.get("schema_version")
+
+    if version == 4:
+        state.setdefault("entries", {})
+        state.setdefault("playlists", {})
+        state.setdefault("pending_notifications", {})
+        state.setdefault("sent_notifications", [])
+        state.setdefault("digest_events", [])
+        state.setdefault("digest_cursor", 0)
+        state.setdefault("last_digest_date", today_utc())
+        return state, False
+
+    if version == 3:
+        # Preserve the existing baseline when upgrading.
+        migrated = new_state(
+            entries=state.get("entries", {}),
+            playlists=state.get("playlists", {}),
+        )
+        print("Migrated state from version 3 to version 4.")
+        return migrated, False
+
+    if version == 2:
+        # Preserve old video IDs. Baseline playlists on this run.
+        migrated = new_state(entries=state.get("entries", {}))
+        migrated["playlists"] = None
+        print("Migrated state from version 2 to version 4.")
+        return migrated, False
+
+    raise RuntimeError(
+        f"Unsupported state schema version: {version}. "
+        "Stopping rather than overwriting saved history."
+    )
+
+
+def send_discord(payload):
     request = urllib.request.Request(
         DISCORD_WEBHOOK_URL,
-        data=json.dumps(payload).encode("utf-8"),
+        data=json.dumps({
+            "embeds": [payload],
+            "allowed_mentions": {"parse": []},
+        }).encode("utf-8"),
         headers={
             **HEADERS,
             "Content-Type": "application/json",
@@ -78,12 +137,84 @@ def discord_embed(title, description, url=None, image=None,
         print(f"Discord HTTP error {error.code}: {details[:500]}")
         raise
 
+
+def make_embed(title, description, url=None, image=None,
+               color=3447003, fields=None):
+    embed = {
+        "title": title[:256],
+        "description": description[:4000],
+        "color": color,
+        "timestamp": now_utc().isoformat(),
+    }
+    if url:
+        embed["url"] = url
+    if image:
+        embed["thumbnail"] = {"url": image}
+    if fields:
+        embed["fields"] = fields[:25]
+    return embed
+
+
+def queue_notification(state, event_id, payload, event_type="alert",
+                       digest_cursor_after=None, digest_date=None):
+    if event_id in state["sent_notifications"]:
+        return
+    if event_id in state["pending_notifications"]:
+        return
+
+    state["pending_notifications"][event_id] = {
+        "payload": payload,
+        "type": event_type,
+        "digest_cursor_after": digest_cursor_after,
+        "digest_date": digest_date,
+    }
+
+
+def record_digest_event(state, event_id, title, description, url):
+    if any(item["id"] == event_id for item in state["digest_events"]):
+        return
+
+    state["digest_events"].append({
+        "id": event_id,
+        "title": title,
+        "description": description,
+        "url": url,
+    })
+
+
+def dispatch_pending(state):
+    # Persist the queue before attempting delivery. If a delivery fails,
+    # the pending item remains saved for a later run.
+    save_state(state)
+
+    for event_id in list(state["pending_notifications"].keys()):
+        item = state["pending_notifications"].get(event_id)
+        if not item:
+            continue
+
+        # Do not mark an event sent until Discord accepts it.
+        send_discord(item["payload"])
+
+        state["pending_notifications"].pop(event_id, None)
+        state["sent_notifications"].append(event_id)
+        state["sent_notifications"] = state["sent_notifications"][
+            -MAX_SENT_HISTORY:
+        ]
+
+        if item["type"] == "digest":
+            state["last_digest_date"] = item["digest_date"]
+            state["digest_cursor"] = item["digest_cursor_after"]
+
+        # Save after every successful delivery so subsequent failures
+        # do not normally resend earlier alerts.
+        save_state(state)
+
+
 def get_channel(handle):
     data = api_get("/channels", {
         "part": "id,snippet,contentDetails",
         "forHandle": handle,
     })
-
     items = data.get("items", [])
     if not items:
         raise RuntimeError(f"Channel not found: {handle}")
@@ -97,6 +228,7 @@ def get_channel(handle):
         "url": "https://www.youtube.com/" + handle,
     }
 
+
 def get_playlists(channel):
     playlists = {
         channel["uploads"]: {
@@ -104,7 +236,6 @@ def get_playlists(channel):
             "is_uploads": True,
         }
     }
-
     page_token = None
 
     while True:
@@ -128,37 +259,31 @@ def get_playlists(channel):
 
         page_token = data.get("nextPageToken")
         if not page_token:
-            break
+            return playlists
 
-    return playlists
 
 def collect_playlist(channel, playlist_id, playlist_info):
     entries = {}
-    page_token = None
-
-    # Check the newest 50 items in each playlist per run.
-    # This keeps the monitor's API usage more manageable.
-    params = {
+    data = api_get("/playlistItems", {
         "part": "snippet,contentDetails,status",
         "playlistId": playlist_id,
         "maxResults": 50,
-    }
-
-    data = api_get("/playlistItems", params)
+    })
 
     for item in data.get("items", []):
         snippet = item.get("snippet", {})
         details = item.get("contentDetails", {})
         status = item.get("status", {})
 
-        video_id = details.get("videoId")
-        if not video_id:
-            video_id = snippet.get("resourceId", {}).get("videoId")
+        video_id = details.get("videoId") or snippet.get(
+            "resourceId", {}
+        ).get("videoId")
 
         if not video_id:
             continue
 
         key = f"{channel['id']}|{playlist_id}|{video_id}"
+        thumbnails = snippet.get("thumbnails", {})
 
         entries[key] = {
             "channel_id": channel["id"],
@@ -172,23 +297,21 @@ def collect_playlist(channel, playlist_id, playlist_info):
             "video_id": video_id,
             "privacy": status.get("privacyStatus", "unknown"),
             "thumbnail": (
-                snippet.get("thumbnails", {}).get("high", {}).get("url")
-                or snippet.get("thumbnails", {}).get("medium", {}).get("url")
+                thumbnails.get("high", {}).get("url")
+                or thumbnails.get("medium", {}).get("url")
+                or thumbnails.get("default", {}).get("url")
             ),
-            "published_at": details.get("videoPublishedAt")
-                or snippet.get("publishedAt"),
         }
 
     return entries
 
+
 def get_video_details(video_ids):
-    details = {}
+    results = {}
 
-    # YouTube videos.list accepts up to 50 IDs per request.
-    unique_ids = list(dict.fromkeys(video_ids))
-
-    for start in range(0, len(unique_ids), 50):
-        batch = unique_ids[start:start + 50]
+    ids = list(dict.fromkeys(video_ids))
+    for start in range(0, len(ids), 50):
+        batch = ids[start:start + 50]
         if not batch:
             continue
 
@@ -198,71 +321,193 @@ def get_video_details(video_ids):
             "maxResults": 50,
         })
 
-        for video in data.get("items", []):
-            details[video["id"]] = video
+        for item in data.get("items", []):
+            results[item["id"]] = item
 
-    return details
+    return results
 
-def load_previous():
-    if not STATE_FILE.exists():
-        return None
 
-    try:
-        state = json.loads(STATE_FILE.read_text(encoding="utf-8"))
-    except (json.JSONDecodeError, OSError):
-        print("State file could not be read; creating a fresh baseline.")
-        return None
+def add_video_alert(state, entry, detail):
+    video_id = entry["video_id"]
+    video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-    version = state.get("schema_version")
+    snippet = detail.get("snippet", {})
+    status = detail.get("status", {})
+    privacy = status.get("privacyStatus", entry["privacy"])
+    broadcast = snippet.get("liveBroadcastContent", "none")
 
-    if version == 3:
-        return {
-            "entries": state.get("entries", {}),
-            "playlists": state.get("playlists", {}),
-        }
+    if broadcast == "upcoming":
+        label = "🎬 PREMIERE / UPCOMING BROADCAST"
+        color = 15844367
+    elif privacy == "unlisted":
+        label = "🔎 UNLISTED VIDEO DETECTED"
+        color = 9807270
+    else:
+        label = "🆕 NEW VIDEO"
+        color = 3066993
 
-    # Migrate the previous monitor's state without treating all existing
-    # videos as new. Public playlists will be baselined on this first run.
-    if version == 2:
-        print("Migrating existing state to version 3.")
-        return {
-            "entries": state.get("entries", {}),
-            "playlists": None,
-        }
-
-    print("No compatible state found; creating a baseline.")
-    return None
-
-def save_state(entries, playlists):
-    state = {
-        "schema_version": 3,
-        "entries": entries,
-        "playlists": playlists,
-    }
-
-    STATE_FILE.write_text(
-        json.dumps(state, indent=2, ensure_ascii=False),
-        encoding="utf-8",
+    thumbnails = snippet.get("thumbnails", {})
+    thumbnail = (
+        thumbnails.get("high", {}).get("url")
+        or entry.get("thumbnail")
     )
 
+    fields = [
+        {"name": "Creator", "value": entry["channel"], "inline": True},
+        {"name": "Visibility", "value": privacy, "inline": True},
+    ]
+
+    scheduled = detail.get("liveStreamingDetails", {}).get(
+        "scheduledStartTime"
+    )
+    if scheduled:
+        fields.append({
+            "name": "Scheduled time (UTC)",
+            "value": scheduled,
+            "inline": False,
+        })
+
+    description = (
+        f"**{entry['title']}**\n"
+        f"[Watch on YouTube]({video_url})\n"
+        f"[Visit channel]({entry['channel_url']})"
+    )
+
+    event_id = f"video:{video_id}"
+    payload = make_embed(
+        label, description, url=video_url, image=thumbnail,
+        color=color, fields=fields,
+    )
+    queue_notification(state, event_id, payload)
+    record_digest_event(state, event_id, label, entry["title"], video_url)
+
+
+def add_playlist_entry_alert(state, entry):
+    video_url = f"https://www.youtube.com/watch?v={entry['video_id']}"
+    privacy = entry["privacy"]
+
+    if privacy == "unlisted":
+        label = "🔎 Unlisted Video Found in Playlist"
+        color = 9807270
+    else:
+        label = "➕ New Playlist Entry"
+        color = 3447003
+
+    description = (
+        f"**{entry['title']}**\n"
+        f"Creator: {entry['channel']}\n"
+        f"Playlist: **{entry['playlist']}**\n"
+        f"Visibility reported by API: **{privacy}**\n"
+        f"[Open video]({video_url})"
+    )
+
+    event_id = (
+        f"entry:{entry['channel_id']}|"
+        f"{entry['playlist_id']}|{entry['video_id']}"
+    )
+    payload = make_embed(
+        label, description, url=video_url,
+        image=entry.get("thumbnail"), color=color,
+    )
+    queue_notification(state, event_id, payload)
+    record_digest_event(state, event_id, label, entry["title"], video_url)
+
+
+def add_new_playlist_alert(state, playlist):
+    playlist_url = (
+        "https://www.youtube.com/playlist?list="
+        + playlist["playlist_id"]
+    )
+    label = "📂 NEW PUBLIC PLAYLIST DISCOVERED"
+
+    description = (
+        f"**{playlist['title']}**\n"
+        f"Creator: {playlist['channel']}\n"
+        f"[Open playlist]({playlist_url})\n"
+        f"[Visit channel]({playlist['channel_url']})"
+    )
+
+    event_id = f"playlist:{playlist['channel_id']}|{playlist['playlist_id']}"
+    payload = make_embed(
+        label, description, url=playlist_url, color=10181046,
+    )
+    queue_notification(state, event_id, payload)
+    record_digest_event(state, event_id, label, playlist["title"], playlist_url)
+
+
+def schedule_daily_digest(state):
+    today = today_utc()
+    digest_id = f"digest:{today}"
+
+    if state["last_digest_date"] == today:
+        return
+
+    # If a previous digest is still queued, retry it first. The next run
+    # can create today's digest after the pending one has been delivered.
+    if any(
+        item.get("type") == "digest"
+        for item in state["pending_notifications"].values()
+    ):
+        return
+
+    cursor = state["digest_cursor"]
+    events = state["digest_events"][cursor:]
+    lines = []
+
+    for event in events[:20]:
+        lines.append(
+            f"• **{event['title']}** — {event['description']} "
+            f"([Open]({event['url']}))"
+        )
+
+    if not lines:
+        description = (
+            "No new videos or playlists were detected since the "
+            "previous daily digest."
+        )
+    else:
+        description = "\n".join(lines)
+        if len(events) > 20:
+            description += (
+                f"\n\n…and {len(events) - 20} more detected events."
+            )
+
+    payload = make_embed(
+        "📊 Daily YouTube Creator Digest",
+        f"Activity summary for the four monitored channels.\n\n"
+        f"{description}\n\n"
+        f"*Digest date: {today} (UTC)*",
+        color=5793266,
+    )
+
+    queue_notification(
+        state,
+        digest_id,
+        payload,
+        event_type="digest",
+        digest_cursor_after=len(state["digest_events"]),
+        digest_date=today,
+    )
+
+
 def main():
+    state, first_run = load_state()
+    old_entries = state.get("entries", {})
+    old_playlists = state.get("playlists")
+
     current_entries = {}
     current_playlists = {}
 
-    channels = []
-
-    # Resolve all four channels and list their public playlists.
     for handle in CHANNEL_HANDLES:
         print(f"Checking {handle}...")
         channel = get_channel(handle)
-        channels.append(channel)
-
         playlists = get_playlists(channel)
 
         for playlist_id, info in playlists.items():
             playlist_key = f"{channel['id']}|{playlist_id}"
 
             current_playlists[playlist_key] = {
+                "channel_id": channel["id"],
                 "channel": channel["name"],
                 "handle": channel["handle"],
                 "channel_url": channel["url"],
@@ -271,168 +516,86 @@ def main():
                 "is_uploads": info["is_uploads"],
             }
 
-            found = collect_playlist(channel, playlist_id, info)
-            current_entries.update(found)
+            current_entries.update(
+                collect_playlist(channel, playlist_id, info)
+            )
 
         print(
             f"{channel['name']}: found {len(playlists)} "
-            "public playlists, including uploads"
+            "public playlists including uploads"
         )
 
-    previous = load_previous()
+    if first_run:
+        state["entries"] = current_entries
+        state["playlists"] = current_playlists
 
-    if previous is None:
-        save_state(current_entries, current_playlists)
-        discord_embed(
-            "✅ YouTube Monitor Started",
-            "Monitoring all four configured channels.\n\n"
-            f"Saved a baseline of {len(current_entries)} playlist entries "
-            f"and {len(current_playlists)} playlists. "
-            "Newly detected items will trigger alerts.",
-            color=3066993,
+        queue_notification(
+            state,
+            "startup:v4",
+            make_embed(
+                "✅ YouTube Monitor Started",
+                "Monitoring all four configured channels. "
+                "The existing public videos and playlists have been "
+                "saved as the initial baseline.",
+                color=3066993,
+            ),
         )
+        save_state(state)
+        dispatch_pending(state)
         print("Initial baseline saved.")
         return
 
-    previous_entries = previous["entries"]
-    previous_playlists = previous["playlists"]
+    # Version 2 migrations had no reliable playlist baseline. Establish
+    # it now so existing playlists do not all trigger alerts.
+    if old_playlists is None:
+        old_playlists = current_playlists.copy()
 
-    new_entry_keys = current_entries.keys() - previous_entries.keys()
+    new_entry_keys = current_entries.keys() - old_entries.keys()
+    new_playlist_keys = current_playlists.keys() - old_playlists.keys()
 
-    if previous_playlists is None:
-        # Migration: baseline playlists now, so existing playlists don't
-        # all generate false "new playlist" alerts.
-        new_playlist_keys = set()
-    else:
-        new_playlist_keys = (
-            current_playlists.keys() - previous_playlists.keys()
-        )
-
-    # Inspect new video IDs for upcoming broadcasts/Premieres.
-    new_video_ids = [
-        current_entries[key]["video_id"]
-        for key in new_entry_keys
-    ]
-    video_details = get_video_details(new_video_ids)
-
-    # Prefer one upload alert per video, even if it is also in a playlist.
     new_upload_ids = {
         current_entries[key]["video_id"]
         for key in new_entry_keys
         if current_entries[key]["is_uploads"]
     }
 
+    details = get_video_details(list(new_upload_ids))
+
     for video_id in sorted(new_upload_ids):
-        matching = next(
-            entry for entry in current_entries.values()
-            if entry["video_id"] == video_id and entry["is_uploads"]
+        entry = next(
+            item for item in current_entries.values()
+            if item["video_id"] == video_id and item["is_uploads"]
         )
+        add_video_alert(state, entry, details.get(video_id, {}))
 
-        detail = video_details.get(video_id, {})
-        snippet = detail.get("snippet", {})
-        status = detail.get("status", {})
-
-        privacy = status.get("privacyStatus", matching["privacy"])
-        broadcast = snippet.get("liveBroadcastContent", "none")
-
-        if broadcast == "upcoming":
-            label = "🎬 PREMIERE / UPCOMING BROADCAST"
-            color = 15844367
-        elif privacy == "unlisted":
-            label = "🔎 UNLISTED VIDEO DETECTED"
-            color = 9807270
-        else:
-            label = "🆕 NEW VIDEO"
-            color = 3066993
-
-        thumbnail = (
-            snippet.get("thumbnails", {}).get("high", {}).get("url")
-            or matching.get("thumbnail")
-        )
-
-        fields = [
-            {"name": "Creator", "value": matching["channel"], "inline": True},
-            {"name": "Visibility", "value": privacy, "inline": True},
-        ]
-
-        scheduled = detail.get("liveStreamingDetails", {}).get(
-            "scheduledStartTime"
-        )
-        if scheduled:
-            fields.append({
-                "name": "Scheduled time",
-                "value": scheduled,
-                "inline": False,
-            })
-
-        discord_embed(
-            label,
-            f"**{matching['title']}**\n"
-            f"[Watch on YouTube](https://www.youtube.com/watch?v={video_id})\n"
-            f"[Visit channel]({matching['channel_url']})",
-            url=f"https://www.youtube.com/watch?v={video_id}",
-            image=thumbnail,
-            color=color,
-            fields=fields,
-        )
-
-    # Detect new playlist entries outside the uploads playlist. These
-    # can also reveal an unlisted video when YouTube exposes its status.
     for key in sorted(new_entry_keys):
         entry = current_entries[key]
 
         if entry["is_uploads"]:
             continue
-
         if entry["video_id"] in new_upload_ids:
             continue
 
-        privacy = entry["privacy"]
-        if privacy == "unlisted":
-            title = "🔎 Unlisted Video Found in Playlist"
-            color = 9807270
-        else:
-            title = "➕ New Playlist Entry"
-            color = 3447003
+        add_playlist_entry_alert(state, entry)
 
-        discord_embed(
-            title,
-            f"**{entry['title']}**\n"
-            f"Creator: {entry['channel']}\n"
-            f"Playlist: **{entry['playlist']}**\n"
-            f"Visibility reported by API: **{privacy}**\n"
-            f"[Open video](https://www.youtube.com/watch?v={entry['video_id']})",
-            url=f"https://www.youtube.com/watch?v={entry['video_id']}",
-            image=entry.get("thumbnail"),
-            color=color,
-        )
-
-    # Detect newly created publicly listed playlists.
     for key in sorted(new_playlist_keys):
         playlist = current_playlists[key]
+        if not playlist["is_uploads"]:
+            add_new_playlist_alert(state, playlist)
 
-        if playlist["is_uploads"]:
-            continue
+    state["entries"] = current_entries
+    state["playlists"] = current_playlists
 
-        discord_embed(
-            "📂 NEW PLAYLIST CREATED / DISCOVERED",
-            f"**{playlist['title']}**\n"
-            f"Creator: {playlist['channel']}\n"
-            f"[Open playlist]("
-            f"https://www.youtube.com/playlist?list={playlist['playlist_id']})\n"
-            f"[Visit channel]({playlist['channel_url']})",
-            url=(
-                "https://www.youtube.com/playlist?list="
-                + playlist["playlist_id"]
-            ),
-            color=10181046,
-        )
+    # Schedule at most one daily digest, using UTC dates.
+    schedule_daily_digest(state)
 
-    # Save only after notifications succeed, so failed alerts can retry.
-    save_state(current_entries, current_playlists)
+    # Save discoveries and the queue before trying to send anything.
+    save_state(state)
+    dispatch_pending(state)
 
     print(f"New playlist entries: {len(new_entry_keys)}")
     print(f"New playlists: {len(new_playlist_keys)}")
+    print(f"Notifications still pending: {len(state['pending_notifications'])}")
     print("Monitor finished successfully.")
 
 
