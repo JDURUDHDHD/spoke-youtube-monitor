@@ -3,16 +3,19 @@ name: Spoke YouTube Monitor
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+concurrency:
+  group: youtube-monitor
+  cancel-in-progress: false
+
 jobs:
   monitor:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,6 +32,7 @@ jobs:
         run: python monitor.py
 
       - name: Save monitoring state
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
