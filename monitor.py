@@ -60,7 +60,7 @@ def api_get(endpoint, params):
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as error:
-        details = error.read().decode("utf-8", errors="replace")
+        print(f"Discord HTTP error {error.code}")
         raise RuntimeError(
             f"YouTube API error {error.code}: {details[:400]}"
         ) from error
