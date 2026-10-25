@@ -12426,227 +12426,6 @@
     }
   },
   "pending_notifications": {
-    "video:29tLMMQ6YCc": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**I Explored a Deserted Minecraft Civilization**\n[Watch on YouTube](https://www.youtube.com/watch?v=29tLMMQ6YCc)\n[Visit channel](https://www.youtube.com/@wemmbumc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.070916+00:00",
-        "url": "https://www.youtube.com/watch?v=29tLMMQ6YCc",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/29tLMMQ6YCc/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Wemmbu",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:2h6dATOHrVY": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Killing 10 Players in 0.01 Seconds**\n[Watch on YouTube](https://www.youtube.com/watch?v=2h6dATOHrVY)\n[Visit channel](https://www.youtube.com/@wemmbumc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.070935+00:00",
-        "url": "https://www.youtube.com/watch?v=2h6dATOHrVY",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/2h6dATOHrVY/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Wemmbu",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:2l5lQURWXhU": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**The most illegal villager in Survival Minecraft…**\n[Watch on YouTube](https://www.youtube.com/watch?v=2l5lQURWXhU)\n[Visit channel](https://www.youtube.com/@Spokeishere)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.070945+00:00",
-        "url": "https://www.youtube.com/watch?v=2l5lQURWXhU",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/2l5lQURWXhU/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Spoke",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:2qFWwD9vO5E": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**This Server Wants to Steal My Levels**\n[Watch on YouTube](https://www.youtube.com/watch?v=2qFWwD9vO5E)\n[Visit channel](https://www.youtube.com/@flamefragsmc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.070976+00:00",
-        "url": "https://www.youtube.com/watch?v=2qFWwD9vO5E",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/2qFWwD9vO5E/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "FlameFrags",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          },
-          {
-            "name": "Scheduled time (UTC)",
-            "value": "2023-07-05T14:00:00Z",
-            "inline": false
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:2vslEpk--bU": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Using Old Strategies to Trap Players**\n[Watch on YouTube](https://www.youtube.com/watch?v=2vslEpk--bU)\n[Visit channel](https://www.youtube.com/@flamefragsmc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071011+00:00",
-        "url": "https://www.youtube.com/watch?v=2vslEpk--bU",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/2vslEpk--bU/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "FlameFrags",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:33g45D2coK4": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**The Full Story of Levels SMP**\n[Watch on YouTube](https://www.youtube.com/watch?v=33g45D2coK4)\n[Visit channel](https://www.youtube.com/@flamefragsmc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071041+00:00",
-        "url": "https://www.youtube.com/watch?v=33g45D2coK4",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/33g45D2coK4/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "FlameFrags",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3N712OoF_FY": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Unstable SMP: The PrinceZam Empire War**\n[Watch on YouTube](https://www.youtube.com/watch?v=3N712OoF_FY)\n[Visit channel](https://www.youtube.com/@wemmbumc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071065+00:00",
-        "url": "https://www.youtube.com/watch?v=3N712OoF_FY",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3N712OoF_FY/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Wemmbu",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3QOYe1kO5Ls": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Why My Minecraft Base is 100% Automatic…**\n[Watch on YouTube](https://www.youtube.com/watch?v=3QOYe1kO5Ls)\n[Visit channel](https://www.youtube.com/@Parrotx2)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071111+00:00",
-        "url": "https://www.youtube.com/watch?v=3QOYe1kO5Ls",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3QOYe1kO5Ls/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Parrot",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
     "video:3VGbed1ur_I": {
       "payload": {
         "title": "🆕 NEW VIDEO",
@@ -19559,7 +19338,15 @@
     "video:1qcZ1y0SWgU",
     "video:1slFlS1gtI8",
     "video:2-FiuCo4JzQ",
-    "video:24ngvf5mPdM"
+    "video:24ngvf5mPdM",
+    "video:29tLMMQ6YCc",
+    "video:2h6dATOHrVY",
+    "video:2l5lQURWXhU",
+    "video:2qFWwD9vO5E",
+    "video:2vslEpk--bU",
+    "video:33g45D2coK4",
+    "video:3N712OoF_FY",
+    "video:3QOYe1kO5Ls"
   ],
   "digest_events": [
     {
@@ -21198,6 +20985,6 @@
     "entries": 925,
     "videos_checked": 508,
     "unlisted_found": 35,
-    "checked_at": "2026-10-25T15:35:19.080208+00:00"
+    "checked_at": "2026-10-25T15:49:56.203237+00:00"
   }
 }
