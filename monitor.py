@@ -7,170 +7,199 @@ import urllib.request
 from pathlib import Path
 
 API_KEY = os.environ["YOUTUBE_API_KEY"]
-WEBHOOK = os.environ["DISCORD_WEBHOOK_URL"]
+DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+
 CHANNEL_ID = "UCk2uxbWi5py_iJXaEsh2YRA"
+API = "https://www.googleapis.com/youtube/v3"
 STATE_FILE = Path("state.json")
-API = "https://www.googleapis.com/youtube/v3/"
+
+HEADERS = {
+    "User-Agent": (
+        "SpokeYouTubeMonitor/1.0 "
+        "(https://github.com/JDURUDHDHD/spoke-youtube-monitor)"
+    )
+}
 
 
 def api_get(endpoint, params):
-    query = dict(params)
-    query["key"] = API_KEY
-    url = API + endpoint + "?" + urllib.parse.urlencode(query)
-    request = urllib.request.Request(url)
+    request_params = dict(params)
+    request_params["key"] = API_KEY
+
+    url = API + endpoint + "?" + urllib.parse.urlencode(request_params)
+    request = urllib.request.Request(url, headers=HEADERS)
+
     with urllib.request.urlopen(request, timeout=30) as response:
         return json.loads(response.read().decode("utf-8"))
 
 
 def discord(message):
     payload = json.dumps({"content": message}).encode("utf-8")
+
     request = urllib.request.Request(
-        WEBHOOK,
+        DISCORD_WEBHOOK_URL,
         data=payload,
-        headers={"Content-Type": "application/json"},
+        headers={
+            **HEADERS,
+            "Content-Type": "application/json",
+        },
         method="POST",
     )
+
     try:
-        with urllib.request.urlopen(request, timeout=30):
-            pass
-    except urllib.error.HTTPError as e:
-        details = e.read().decode("utf-8", errors="replace")
-        print(f"Discord HTTP error: {e.code}")
+        with urllib.request.urlopen(request, timeout=30) as response:
+            print(f"Discord message sent. HTTP {response.status}")
+
+    except urllib.error.HTTPError as error:
+        details = error.read().decode("utf-8", errors="replace")
+        print(f"Discord HTTP error: {error.code}")
         print(f"Discord response: {details[:500]}")
         raise
 
 
-def pages(endpoint, params):
-    token = None
-    while True:
-        query = dict(params, maxResults=50)
-        if token:
-            query["pageToken"] = token
-        result = api_get(endpoint, query)
-        yield from result.get("items", [])
-        token = result.get("nextPageToken")
-        if not token:
-            break
+def get_uploads_playlist():
+    data = api_get(
+        "/channels",
+        {
+            "part": "contentDetails",
+            "id": CHANNEL_ID,
+        },
+    )
 
-
-def get_channel():
-    result = api_get("channels", {
-        "part": "contentDetails",
-        "id": CHANNEL_ID,
-    })
-    items = result.get("items", [])
+    items = data.get("items", [])
     if not items:
-        raise RuntimeError("Channel not found by the YouTube API.")
+        raise RuntimeError(
+            "YouTube channel not found. Check CHANNEL_ID."
+        )
+
     return items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
 
 
-def collect():
-    playlists = {}
-    uploads = []
-    unavailable = {}
+def collect_playlist(playlist_id):
+    videos = {}
+    page_token = None
 
-    for item in pages("playlists", {
-        "part": "snippet",
-        "channelId": CHANNEL_ID,
-    }):
-        pid = item["id"]
-        playlists[pid] = item["snippet"].get("title", "Untitled playlist")
-
-    uploads_playlist = get_channel()
-
-    for item in pages("playlistItems", {
-        "part": "snippet,contentDetails",
-        "playlistId": uploads_playlist,
-    }):
-        video_id = item.get("contentDetails", {}).get("videoId")
-        if video_id:
-            uploads.append(video_id)
-
-    for pid, playlist_title in playlists.items():
-        for item in pages("playlistItems", {
+    while True:
+        params = {
             "part": "snippet,contentDetails",
-            "playlistId": pid,
-        }):
-            snippet = item.get("snippet", {})
-            content = item.get("contentDetails", {})
-            title = snippet.get("title", "Unknown video")
-            video_id = content.get("videoId")
-            low_title = title.lower()
+            "playlistId": playlist_id,
+            "maxResults": 50,
+        }
 
-            is_unavailable = (
-                "private video" in low_title
-                or "deleted video" in low_title
-                or "unavailable video" in low_title
-                or not video_id
+        if page_token:
+            params["pageToken"] = page_token
+
+        data = api_get("/playlistItems", params)
+
+        for item in data.get("items", []):
+            snippet = item.get("snippet", {})
+            details = item.get("contentDetails", {})
+            video_id = details.get("videoId")
+
+            if not video_id:
+                continue
+
+            videos[video_id] = {
+                "title": snippet.get("title", "Untitled"),
+                "publishedAt": details.get(
+                    "videoPublishedAt",
+                    snippet.get("publishedAt", ""),
+                ),
+                "playlist": playlist_id,
+            }
+
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
+
+    return videos
+
+
+def collect():
+    uploads_playlist = get_uploads_playlist()
+    playlist_ids = {uploads_playlist}
+    page_token = None
+
+    while True:
+        data = api_get(
+            "/playlists",
+            {
+                "part": "id",
+                "channelId": CHANNEL_ID,
+                "maxResults": 50,
+                **(
+                    {"pageToken": page_token}
+                    if page_token
+                    else {}
+                ),
+            },
+        )
+
+        for item in data.get("items", []):
+            playlist_ids.add(item["id"])
+
+        page_token = data.get("nextPageToken")
+        if not page_token:
+            break
+
+    videos = {}
+
+    for playlist_id in sorted(playlist_ids):
+        try:
+            videos.update(collect_playlist(playlist_id))
+        except urllib.error.HTTPError as error:
+            print(
+                f"Could not read playlist {playlist_id}: "
+                f"HTTP {error.code}"
             )
 
-            if is_unavailable:
-                position = snippet.get("position", -1)
-                key = f"{pid}:{position}:{title}"
-                unavailable[key] = {
-                    "playlist": playlist_title,
-                    "title": title,
-                    "video_id": video_id,
-                }
-
-    return {
-        "playlists": playlists,
-        "uploads": sorted(set(uploads)),
-        "unavailable": unavailable,
-    }
+    return videos
 
 
 def main():
+    print("Checking YouTube channel...")
     current = collect()
-    previous = None
+    print(f"Found {len(current)} public playlist/upload entries.")
 
     if STATE_FILE.exists():
-        previous = json.loads(STATE_FILE.read_text())
-
-    if previous is None:
-        discord(
-            "✅ Spoke monitor started. Baseline saved for public playlists "
-            "and uploads. I'll alert on newly detected changes."
-        )
-        STATE_FILE.write_text(json.dumps(current, indent=2))
-        print("Baseline saved successfully.")
-        return
-
-    alerts = []
-
-    for pid, title in current["playlists"].items():
-        if pid not in previous["playlists"]:
-            alerts.append(
-                f"📂 New public playlist: **{title}**\n"
-                f"https://www.youtube.com/playlist?list={pid}"
+        try:
+            previous = json.loads(
+                STATE_FILE.read_text(encoding="utf-8")
             )
+        except (json.JSONDecodeError, OSError):
+            previous = {}
 
-    old_uploads = set(previous["uploads"])
-    for video_id in current["uploads"]:
-        if video_id not in old_uploads:
-            alerts.append(
-                f"🎬 New public upload!\n"
+        new_ids = current.keys() - previous.keys()
+
+        for video_id in sorted(new_ids):
+            video = current[video_id]
+            message = (
+                "🆕 New YouTube entry detected\n"
+                f"Title: {video['title']}\n"
                 f"https://www.youtube.com/watch?v={video_id}"
             )
+            discord(message)
 
-    old_unavailable = set(previous["unavailable"])
-    for key, item in current["unavailable"].items():
-        if key not in old_unavailable:
-            alerts.append(
-                f"⚠️ Potential unavailable playlist entry\n"
-                f"Playlist: {item['playlist']}\n"
-                f"Entry: {item['title']}"
-            )
+        STATE_FILE.write_text(
+            json.dumps(current, indent=2),
+            encoding="utf-8",
+        )
 
-    for start in range(0, len(alerts), 5):
-        discord("\n\n".join(alerts[start:start + 5]))
+        print(f"Check complete. New entries: {len(new_ids)}")
 
-    STATE_FILE.write_text(json.dumps(current, indent=2))
-
-    if alerts:
-        print(f"Sent {len(alerts)} alert(s).")
     else:
-        print("No new public changes detected.")
+        discord(
+            "✅ Spoke monitor started. "
+            f"Found {len(current)} public playlist/upload entries. "
+            "This is the initial baseline; future checks will alert "
+            "on newly detected entries."
+        )
+
+        STATE_FILE.write_text(
+            json.dumps(current, indent=2),
+            encoding="utf-8",
+        )
+
+        print("Initial baseline saved.")
 
 
 if __name__ == "__main__":
