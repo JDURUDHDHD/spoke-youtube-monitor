@@ -1,4 +1,5 @@
 
+import time
 import json
 import os
 import urllib.parse
@@ -616,6 +617,15 @@ def schedule_daily_digest(state):
 
 def main():
     state, first_run = load_state()
+
+    if not state.get("pending_backlog_cleared_v1"):
+        old_count = len(state.get("pending_notifications", {}))
+        state["pending_notifications"] = {}
+        state["digest_cursor"] = len(state.get("digest_events", []))
+        state["pending_backlog_cleared_v1"] = True
+        save_state(state)
+        print(f"Cleared {old_count} old queued notifications.")
+        
     old_entries = state.get("entries", {})
     old_playlists = state.get("playlists")
 
