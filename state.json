@@ -12426,286 +12426,6 @@
     }
   },
   "pending_notifications": {
-    "video:3VGbed1ur_I": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**This Minecraft SMP Wants Me DEAD**\n[Watch on YouTube](https://www.youtube.com/watch?v=3VGbed1ur_I)\n[Visit channel](https://www.youtube.com/@Parrotx2)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071157+00:00",
-        "url": "https://www.youtube.com/watch?v=3VGbed1ur_I",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3VGbed1ur_I/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Parrot",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3_cPsv5yg8Q": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**1,017 Withers VS Minecraft SMP…**\n[Watch on YouTube](https://www.youtube.com/watch?v=3_cPsv5yg8Q)\n[Visit channel](https://www.youtube.com/@Spokeishere)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071170+00:00",
-        "url": "https://www.youtube.com/watch?v=3_cPsv5yg8Q",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3_cPsv5yg8Q/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Spoke",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3mJkPNai3Ac": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Minecraft Mansave, but my friends are in creative**\n[Watch on YouTube](https://www.youtube.com/watch?v=3mJkPNai3Ac)\n[Visit channel](https://www.youtube.com/@Parrotx2)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071217+00:00",
-        "url": "https://www.youtube.com/watch?v=3mJkPNai3Ac",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3mJkPNai3Ac/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Parrot",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3rlw4ud2xWE": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**Every Hub title & How to earn them on Minecraft Hive. (Time Stamps in Description)**\n[Watch on YouTube](https://www.youtube.com/watch?v=3rlw4ud2xWE)\n[Visit channel](https://www.youtube.com/@flamefragsmc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071252+00:00",
-        "url": "https://www.youtube.com/watch?v=3rlw4ud2xWE",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3rlw4ud2xWE/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "FlameFrags",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:3yam-9Vw700": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**1,047 Ravagers VS Minecraft SMP...**\n[Watch on YouTube](https://www.youtube.com/watch?v=3yam-9Vw700)\n[Visit channel](https://www.youtube.com/@Spokeishere)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071264+00:00",
-        "url": "https://www.youtube.com/watch?v=3yam-9Vw700",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/3yam-9Vw700/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Spoke",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:41U2CxzHuBE": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**The Story of Wemmbu**\n[Watch on YouTube](https://www.youtube.com/watch?v=41U2CxzHuBE)\n[Visit channel](https://www.youtube.com/@wemmbumc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071287+00:00",
-        "url": "https://www.youtube.com/watch?v=41U2CxzHuBE",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/41U2CxzHuBE/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Wemmbu",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          },
-          {
-            "name": "Scheduled time (UTC)",
-            "value": "2023-10-20T13:00:00Z",
-            "inline": false
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:48fZaSwUdmg": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**I Explored an Abandoned Minecraft Civilization**\n[Watch on YouTube](https://www.youtube.com/watch?v=48fZaSwUdmg)\n[Visit channel](https://www.youtube.com/@wemmbumc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071328+00:00",
-        "url": "https://www.youtube.com/watch?v=48fZaSwUdmg",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/48fZaSwUdmg/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Wemmbu",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:4Yn4o6xOe-0": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**How I Lost My Immortality**\n[Watch on YouTube](https://www.youtube.com/watch?v=4Yn4o6xOe-0)\n[Visit channel](https://www.youtube.com/@flamefragsmc)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071364+00:00",
-        "url": "https://www.youtube.com/watch?v=4Yn4o6xOe-0",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/4Yn4o6xOe-0/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "FlameFrags",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          },
-          {
-            "name": "Scheduled time (UTC)",
-            "value": "2023-10-18T14:00:00Z",
-            "inline": false
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:5F8bGRKP47w": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**I spawned every single mob (WORMHOLE DAY 6)**\n[Watch on YouTube](https://www.youtube.com/watch?v=5F8bGRKP47w)\n[Visit channel](https://www.youtube.com/@Spokeishere)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071379+00:00",
-        "url": "https://www.youtube.com/watch?v=5F8bGRKP47w",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/5F8bGRKP47w/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Spoke",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
-    "video:5H9HRJmgnQA": {
-      "payload": {
-        "title": "🆕 NEW VIDEO",
-        "description": "**I Annihilated The Lifesteal SMP...**\n[Watch on YouTube](https://www.youtube.com/watch?v=5H9HRJmgnQA)\n[Visit channel](https://www.youtube.com/@Spokeishere)",
-        "color": 3066993,
-        "timestamp": "2026-10-25T15:35:19.071390+00:00",
-        "url": "https://www.youtube.com/watch?v=5H9HRJmgnQA",
-        "thumbnail": {
-          "url": "https://i.ytimg.com/vi/5H9HRJmgnQA/hqdefault.jpg"
-        },
-        "fields": [
-          {
-            "name": "Creator",
-            "value": "Spoke",
-            "inline": true
-          },
-          {
-            "name": "Visibility",
-            "value": "public",
-            "inline": true
-          }
-        ]
-      },
-      "type": "alert",
-      "digest_cursor_after": null,
-      "digest_date": null
-    },
     "video:5O8JITrczUM": {
       "payload": {
         "title": "🆕 NEW VIDEO",
@@ -19346,7 +19066,17 @@
     "video:2vslEpk--bU",
     "video:33g45D2coK4",
     "video:3N712OoF_FY",
-    "video:3QOYe1kO5Ls"
+    "video:3QOYe1kO5Ls",
+    "video:3VGbed1ur_I",
+    "video:3_cPsv5yg8Q",
+    "video:3mJkPNai3Ac",
+    "video:3rlw4ud2xWE",
+    "video:3yam-9Vw700",
+    "video:41U2CxzHuBE",
+    "video:48fZaSwUdmg",
+    "video:4Yn4o6xOe-0",
+    "video:5F8bGRKP47w",
+    "video:5H9HRJmgnQA"
   ],
   "digest_events": [
     {
@@ -20985,6 +20715,6 @@
     "entries": 925,
     "videos_checked": 508,
     "unlisted_found": 35,
-    "checked_at": "2026-10-25T15:49:56.203237+00:00"
+    "checked_at": "2026-10-25T16:13:09.986128+00:00"
   }
 }
