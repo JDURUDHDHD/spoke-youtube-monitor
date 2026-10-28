@@ -12454,7 +12454,8 @@
     "video:5F8bGRKP47w",
     "video:5H9HRJmgnQA",
     "digest:2026-10-26",
-    "digest:2026-10-27"
+    "digest:2026-10-27",
+    "digest:2026-10-28"
   ],
   "digest_events": [
     {
@@ -14049,7 +14050,7 @@
     }
   ],
   "digest_cursor": 265,
-  "last_digest_date": "2026-10-27",
+  "last_digest_date": "2026-10-28",
   "unlisted_alerted": {
     "hJma4lwUfAU": true,
     "7hd-gO5fWEU": true,
@@ -14093,7 +14094,7 @@
     "entries": 925,
     "videos_checked": 508,
     "unlisted_found": 35,
-    "checked_at": "2026-10-27T23:51:15.962229+00:00"
+    "checked_at": "2026-10-28T00:42:47.508272+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
