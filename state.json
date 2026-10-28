@@ -2185,6 +2185,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/V9HzAdwgf-I/hqdefault.jpg"
     },
+    "UCk2uxbWi5py_iJXaEsh2YRA|PLS5P5ZjQ8ihs|lA1ohDqw8XA": {
+      "channel_id": "UCk2uxbWi5py_iJXaEsh2YRA",
+      "channel": "Spoke",
+      "handle": "@Spokeishere",
+      "channel_url": "https://www.youtube.com/@Spokeishere",
+      "playlist_id": "PLS5P5ZjQ8ihs",
+      "playlist": "The Unstable SMP",
+      "is_uploads": false,
+      "title": "Exploring Minecraft's Forgotten Dimension",
+      "video_id": "lA1ohDqw8XA",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/lA1ohDqw8XA/hqdefault.jpg"
+    },
     "UCk2uxbWi5py_iJXaEsh2YRA|PLS5P5ZjQ8ihs|IOS7FKtiyxE": {
       "channel_id": "UCk2uxbWi5py_iJXaEsh2YRA",
       "channel": "Spoke",
@@ -14091,10 +14104,10 @@
   "last_scan_report": {
     "status": "SUCCESS",
     "channels": 4,
-    "entries": 925,
+    "entries": 926,
     "videos_checked": 508,
     "unlisted_found": 35,
-    "checked_at": "2026-10-28T04:07:30.082447+00:00"
+    "checked_at": "2026-10-28T04:53:42.303319+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
