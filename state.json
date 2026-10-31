@@ -5955,6 +5955,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/O_cfnliNFmg/hqdefault.jpg"
     },
+    "UCvYPobTo42NM36X7VC4dLhA|UUvYPobTo42NM36X7VC4dLhA|ZT-k42SC7L0": {
+      "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
+      "channel": "FlameFrags",
+      "handle": "@flamefragsmc",
+      "channel_url": "https://www.youtube.com/@flamefragsmc",
+      "playlist_id": "UUvYPobTo42NM36X7VC4dLhA",
+      "playlist": "Uploads",
+      "is_uploads": true,
+      "title": "10,000 VS 10,000 Player Minecraft War",
+      "video_id": "ZT-k42SC7L0",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/ZT-k42SC7L0/hqdefault.jpg"
+    },
     "UCvYPobTo42NM36X7VC4dLhA|UUvYPobTo42NM36X7VC4dLhA|8t8YBu7bdT0": {
       "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
       "channel": "FlameFrags",
@@ -7567,6 +7580,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/8t8YBu7bdT0/hqdefault.jpg"
     },
+    "UCvYPobTo42NM36X7VC4dLhA|PLKHzhN0vWxx4|ZT-k42SC7L0": {
+      "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
+      "channel": "FlameFrags",
+      "handle": "@flamefragsmc",
+      "channel_url": "https://www.youtube.com/@flamefragsmc",
+      "playlist_id": "PLKHzhN0vWxx4",
+      "playlist": "Unstable SMP: The Rebirth Arc",
+      "is_uploads": false,
+      "title": "10,000 VS 10,000 Player Minecraft War",
+      "video_id": "ZT-k42SC7L0",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/ZT-k42SC7L0/hqdefault.jpg"
+    },
     "UCvYPobTo42NM36X7VC4dLhA|PLWA0Kka1uF6Y|ljppGDO4HlU": {
       "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
       "channel": "FlameFrags",
@@ -8450,6 +8476,19 @@
       "video_id": "8t8YBu7bdT0",
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/8t8YBu7bdT0/hqdefault.jpg"
+    },
+    "UCvYPobTo42NM36X7VC4dLhA|PLOdgdGZFBuB4|ZT-k42SC7L0": {
+      "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
+      "channel": "FlameFrags",
+      "handle": "@flamefragsmc",
+      "channel_url": "https://www.youtube.com/@flamefragsmc",
+      "playlist_id": "PLOdgdGZFBuB4",
+      "playlist": "The Unstable SMP",
+      "is_uploads": false,
+      "title": "10,000 VS 10,000 Player Minecraft War",
+      "video_id": "ZT-k42SC7L0",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/ZT-k42SC7L0/hqdefault.jpg"
     },
     "UCvYPobTo42NM36X7VC4dLhA|PLhS7X27229a-A4yFA1TwPvr5jxLNQm6-o|K28oBGv7nIA": {
       "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
@@ -12471,7 +12510,8 @@
     "digest:2026-10-28",
     "digest:2026-10-29",
     "digest:2026-10-30",
-    "digest:2026-10-31"
+    "digest:2026-10-31",
+    "video:ZT-k42SC7L0"
   ],
   "digest_events": [
     {
@@ -14063,6 +14103,12 @@
       "title": "Unlisted video detected",
       "description": "FlameFrags: Playing Lifesteal SMP ***",
       "url": "https://www.youtube.com/watch?v=EWlJugqhjk0"
+    },
+    {
+      "id": "video:ZT-k42SC7L0",
+      "title": "🆕 NEW VIDEO",
+      "description": "10,000 VS 10,000 Player Minecraft War",
+      "url": "https://www.youtube.com/watch?v=ZT-k42SC7L0"
     }
   ],
   "digest_cursor": 265,
@@ -14107,10 +14153,10 @@
   "last_scan_report": {
     "status": "SUCCESS",
     "channels": 4,
-    "entries": 926,
-    "videos_checked": 508,
+    "entries": 929,
+    "videos_checked": 509,
     "unlisted_found": 35,
-    "checked_at": "2026-10-31T16:12:31.762026+00:00"
+    "checked_at": "2026-10-31T16:56:28.627586+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
