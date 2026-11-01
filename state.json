@@ -9283,6 +9283,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/eMJfNFWP32M/hqdefault.jpg"
     },
+    "UCPLMPHT-d8GZOqL_AHJFdQQ|UUPLMPHT-d8GZOqL_AHJFdQQ|bHxLy6Qza3M": {
+      "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
+      "channel": "Parrot",
+      "handle": "@Parrotx2",
+      "channel_url": "https://www.youtube.com/@Parrotx2",
+      "playlist_id": "UUPLMPHT-d8GZOqL_AHJFdQQ",
+      "playlist": "Uploads",
+      "is_uploads": true,
+      "title": "10,000 Player Minecraft War: Nether VS Overworld",
+      "video_id": "bHxLy6Qza3M",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/bHxLy6Qza3M/hqdefault.jpg"
+    },
     "UCPLMPHT-d8GZOqL_AHJFdQQ|UUPLMPHT-d8GZOqL_AHJFdQQ|9-j9GWjyWpY": {
       "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
       "channel": "Parrot",
@@ -10713,6 +10726,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/d1vtiscUGJU/hqdefault.jpg"
     },
+    "UCPLMPHT-d8GZOqL_AHJFdQQ|PLahuEUfANUkI|bHxLy6Qza3M": {
+      "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
+      "channel": "Parrot",
+      "handle": "@Parrotx2",
+      "channel_url": "https://www.youtube.com/@Parrotx2",
+      "playlist_id": "PLahuEUfANUkI",
+      "playlist": "Unstable SMP: Dimensional War Arc",
+      "is_uploads": false,
+      "title": "10,000 Player Minecraft War: Nether VS Overworld",
+      "video_id": "bHxLy6Qza3M",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/bHxLy6Qza3M/hqdefault.jpg"
+    },
     "UCPLMPHT-d8GZOqL_AHJFdQQ|PLRkF39_6HfEo|1EgS0othQe4": {
       "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
       "channel": "Parrot",
@@ -11597,6 +11623,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/9-j9GWjyWpY/hqdefault.jpg"
     },
+    "UCPLMPHT-d8GZOqL_AHJFdQQ|PLbNz4_7Ztd1U|bHxLy6Qza3M": {
+      "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
+      "channel": "Parrot",
+      "handle": "@Parrotx2",
+      "channel_url": "https://www.youtube.com/@Parrotx2",
+      "playlist_id": "PLbNz4_7Ztd1U",
+      "playlist": "The Unstable SMP",
+      "is_uploads": false,
+      "title": "10,000 Player Minecraft War: Nether VS Overworld",
+      "video_id": "bHxLy6Qza3M",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/bHxLy6Qza3M/hqdefault.jpg"
+    },
     "UCPLMPHT-d8GZOqL_AHJFdQQ|PLu0onnEWPanu3QkFcTyONG2uvj4RJHXaY|J0Jj6A72OoE": {
       "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
       "channel": "Parrot",
@@ -12077,6 +12116,19 @@
       "video_id": "9-j9GWjyWpY",
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/9-j9GWjyWpY/hqdefault.jpg"
+    },
+    "UCPLMPHT-d8GZOqL_AHJFdQQ|PLu0onnEWPanu3QkFcTyONG2uvj4RJHXaY|bHxLy6Qza3M": {
+      "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
+      "channel": "Parrot",
+      "handle": "@Parrotx2",
+      "channel_url": "https://www.youtube.com/@Parrotx2",
+      "playlist_id": "PLu0onnEWPanu3QkFcTyONG2uvj4RJHXaY",
+      "playlist": "Unstable SMP: All Videos (IN ORDER)",
+      "is_uploads": false,
+      "title": "10,000 Player Minecraft War: Nether VS Overworld",
+      "video_id": "bHxLy6Qza3M",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/bHxLy6Qza3M/hqdefault.jpg"
     }
   },
   "playlists": {
@@ -12404,6 +12456,15 @@
       "title": "Uploads",
       "is_uploads": true
     },
+    "UCPLMPHT-d8GZOqL_AHJFdQQ|PLahuEUfANUkI": {
+      "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
+      "channel": "Parrot",
+      "handle": "@Parrotx2",
+      "channel_url": "https://www.youtube.com/@Parrotx2",
+      "playlist_id": "PLahuEUfANUkI",
+      "title": "Unstable SMP: Dimensional War Arc",
+      "is_uploads": false
+    },
     "UCPLMPHT-d8GZOqL_AHJFdQQ|PLRkF39_6HfEo": {
       "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
       "channel": "Parrot",
@@ -12477,7 +12538,35 @@
       "is_uploads": false
     }
   },
-  "pending_notifications": {},
+  "pending_notifications": {
+    "video:bHxLy6Qza3M": {
+      "payload": {
+        "title": "🆕 NEW VIDEO",
+        "description": "**10,000 Player Minecraft War: Nether VS Overworld**\n[Watch on YouTube](https://www.youtube.com/watch?v=bHxLy6Qza3M)\n[Visit channel](https://www.youtube.com/@Parrotx2)",
+        "color": 3066993,
+        "timestamp": "2026-11-01T16:55:41.807482+00:00",
+        "url": "https://www.youtube.com/watch?v=bHxLy6Qza3M",
+        "thumbnail": {
+          "url": "https://i.ytimg.com/vi/bHxLy6Qza3M/hqdefault.jpg"
+        },
+        "fields": [
+          {
+            "name": "Creator",
+            "value": "Parrot",
+            "inline": true
+          },
+          {
+            "name": "Visibility",
+            "value": "public",
+            "inline": true
+          }
+        ]
+      },
+      "type": "alert",
+      "digest_cursor_after": null,
+      "digest_date": null
+    }
+  },
   "sent_notifications": [
     "video:-PBp8ifzJrY",
     "video:-cqUL2gQ79I",
@@ -14110,6 +14199,12 @@
       "title": "🆕 NEW VIDEO",
       "description": "10,000 VS 10,000 Player Minecraft War",
       "url": "https://www.youtube.com/watch?v=ZT-k42SC7L0"
+    },
+    {
+      "id": "video:bHxLy6Qza3M",
+      "title": "🆕 NEW VIDEO",
+      "description": "10,000 Player Minecraft War: Nether VS Overworld",
+      "url": "https://www.youtube.com/watch?v=bHxLy6Qza3M"
     }
   ],
   "digest_cursor": 266,
@@ -14154,10 +14249,10 @@
   "last_scan_report": {
     "status": "SUCCESS",
     "channels": 4,
-    "entries": 929,
-    "videos_checked": 509,
+    "entries": 933,
+    "videos_checked": 510,
     "unlisted_found": 35,
-    "checked_at": "2026-11-01T16:14:15.641795+00:00"
+    "checked_at": "2026-11-01T16:55:41.807842+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
