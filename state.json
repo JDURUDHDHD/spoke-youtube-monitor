@@ -12511,7 +12511,8 @@
     "digest:2026-10-29",
     "digest:2026-10-30",
     "digest:2026-10-31",
-    "video:ZT-k42SC7L0"
+    "video:ZT-k42SC7L0",
+    "digest:2026-11-01"
   ],
   "digest_events": [
     {
@@ -14111,8 +14112,8 @@
       "url": "https://www.youtube.com/watch?v=ZT-k42SC7L0"
     }
   ],
-  "digest_cursor": 265,
-  "last_digest_date": "2026-10-31",
+  "digest_cursor": 266,
+  "last_digest_date": "2026-11-01",
   "unlisted_alerted": {
     "hJma4lwUfAU": true,
     "7hd-gO5fWEU": true,
@@ -14156,7 +14157,7 @@
     "entries": 929,
     "videos_checked": 509,
     "unlisted_found": 35,
-    "checked_at": "2026-10-31T23:52:18.474243+00:00"
+    "checked_at": "2026-11-01T00:50:48.128531+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
