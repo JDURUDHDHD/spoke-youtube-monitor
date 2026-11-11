@@ -12576,6 +12576,17 @@
       "type": "digest",
       "digest_cursor_after": 267,
       "digest_date": "2026-11-02"
+    },
+    "scan-error:2026-11-11": {
+      "payload": {
+        "title": "⚠️ YouTube Monitor Scan Failed",
+        "description": "The scan did not complete. The previous video and playlist baseline was preserved.\n\n**Error:** name 'details' is not defined\n\nThe next scheduled run will try again.",
+        "color": 15158332,
+        "timestamp": "2026-11-11T22:50:04.841823+00:00"
+      },
+      "type": "alert",
+      "digest_cursor_after": null,
+      "digest_date": null
     }
   },
   "sent_notifications": [
