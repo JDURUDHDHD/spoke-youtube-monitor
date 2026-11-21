@@ -9166,6 +9166,19 @@
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/SRwwgXmH_Zg/hqdefault.jpg"
     },
+    "UCvYPobTo42NM36X7VC4dLhA|PLhS7X27229a8wGnGARtLQikbGxcLTjRoY|jC9nslGX8Yk": {
+      "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
+      "channel": "FlameFrags",
+      "handle": "@flamefragsmc",
+      "channel_url": "https://www.youtube.com/@flamefragsmc",
+      "playlist_id": "PLhS7X27229a8wGnGARtLQikbGxcLTjRoY",
+      "playlist": "FlameFrags Official Soundtracks",
+      "is_uploads": false,
+      "title": "Burn the Horizon EXTENDED - Music for FlameFrags",
+      "video_id": "jC9nslGX8Yk",
+      "privacy": "public",
+      "thumbnail": "https://i.ytimg.com/vi/jC9nslGX8Yk/hqdefault.jpg"
+    },
     "UCvYPobTo42NM36X7VC4dLhA|PLhS7X27229a8wGnGARtLQikbGxcLTjRoY|i_fPCVpaWzU": {
       "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
       "channel": "FlameFrags",
@@ -9282,19 +9295,6 @@
       "video_id": "eMJfNFWP32M",
       "privacy": "public",
       "thumbnail": "https://i.ytimg.com/vi/eMJfNFWP32M/hqdefault.jpg"
-    },
-    "UCvYPobTo42NM36X7VC4dLhA|PLhS7X27229a8wGnGARtLQikbGxcLTjRoY|jC9nslGX8Yk": {
-      "channel_id": "UCvYPobTo42NM36X7VC4dLhA",
-      "channel": "FlameFrags",
-      "handle": "@flamefragsmc",
-      "channel_url": "https://www.youtube.com/@flamefragsmc",
-      "playlist_id": "PLhS7X27229a8wGnGARtLQikbGxcLTjRoY",
-      "playlist": "FlameFrags Official Soundtracks",
-      "is_uploads": false,
-      "title": "Burn the Horizon EXTENDED - Music for FlameFrags",
-      "video_id": "jC9nslGX8Yk",
-      "privacy": "public",
-      "thumbnail": "https://i.ytimg.com/vi/jC9nslGX8Yk/hqdefault.jpg"
     },
     "UCPLMPHT-d8GZOqL_AHJFdQQ|UUPLMPHT-d8GZOqL_AHJFdQQ|bHxLy6Qza3M": {
       "channel_id": "UCPLMPHT-d8GZOqL_AHJFdQQ",
@@ -14298,7 +14298,7 @@
     "entries": 934,
     "videos_checked": 511,
     "unlisted_found": 35,
-    "checked_at": "2026-11-21T18:53:40.019567+00:00"
+    "checked_at": "2026-11-21T19:43:25.021766+00:00"
   },
   "pending_backlog_cleared_v1": true
 }
